@@ -31,8 +31,9 @@ def read_dataset_csv():
 def make_query(df_dataset):
     return list(df_dataset.groupby('race_id').count().race_course)
 
-def rank_to_label(df_dataset):
-    df_dataset["label"] = df_dataset["rank"].apply(make_label)
+def rank_to_label(df_dataset, training=True):
+    if training:
+        df_dataset["label"] = df_dataset["rank"].apply(make_label)
     df_dataset["rank-1"] = df_dataset["rank-1"].apply(make_label)
     df_dataset["rank-2"] = df_dataset["rank-2"].apply(make_label)
     df_dataset["rank-3"] = df_dataset["rank-3"].apply(make_label)
