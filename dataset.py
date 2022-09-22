@@ -1,14 +1,16 @@
 import os
-from os.path import join, dirname
+from os.path import join
 from dotenv import load_dotenv
 from pathlib import Path
 import numpy as np
 import lightgbm as lgb
+import pandas as pd
 
 import utils.read_data as rd
 import utils.io_model as io_m
 import utils.preprocessing as pp
 import utils.prepare_data as prepare_data
+import utils.join_race_data as join_race_data
 
 load_dotenv(verbose=True)
 dotenv_path = join(Path().resolve(), '.env')
@@ -65,3 +67,29 @@ def load_dataset_for_training_lambdarank():
     dval = lgb.Dataset(x_test, y_test, reference=dtrain, group=query_test)
     
     return dtrain, dval
+
+def add_past_race_data(target_df, past_df, n):
+    # ターゲットデータに過去nレース分の情報を追加
+    columns_past_data = [c for c in past_df.columns if "-" not in c]
+    target_df_added_past_data = join_race_data.join_n_race_for_test_data(
+        past_df[columns_past_data], 
+        target_df, 
+        n
+    )
+    
+    return target_df_added_past_data
+
+def create_df_for_prediction(target_data_path):
+    target_horse_df = rd.read_target_horse_csv(target_data_path)
+    target_race_df  = rd.read_target_race_csv(target_data_path)
+    target_df = pd.merge(target_horse_df, target_race_df, on='race_id', how='left')
+    
+    past_df = rd.read_horse_race_csv(DATA_PATH)
+    df_for_prediction = add_past_race_data(target_df, past_df, 3)
+    df_for_prediction = prepare_data.prepare_data_for_prediction(
+        df_for_prediction, 
+        past_df, 
+        use_default_make_label=True
+    )
+    
+    return df_for_prediction
