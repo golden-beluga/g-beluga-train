@@ -4,11 +4,6 @@ from sklearn.model_selection import train_test_split
 import pickle
 
 import dataset
-import utils.read_data as rd
-import utils.preprocessing as pp
-import utils.join_race_data as jrd
-import utils.prepare_data as prepare_data
-import utils.io_model as im
 
 import os
 from os.path import join, dirname
