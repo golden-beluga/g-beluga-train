@@ -79,13 +79,22 @@ def add_past_race_data(target_df, past_df, n):
     
     return target_df_added_past_data
 
-def create_df_for_prediction(target_data_path):
+def load_df_for_prediction(target_data_path):
     target_horse_df = rd.read_target_horse_csv(target_data_path)
     target_race_df  = rd.read_target_race_csv(target_data_path)
     target_df = pd.merge(target_horse_df, target_race_df, on='race_id', how='left')
     
     past_df = rd.read_horse_race_csv(DATA_PATH)
     df_for_prediction = add_past_race_data(target_df, past_df, 3)
+    
+    return df_for_prediction, past_df
+
+def load_df_for_prediction_of_lambdarank(target_data_path):
+    df_for_prediction, past_df = load_df_for_prediction(target_data_path)
+    
+    df_for_prediction = rank_to_label(df_for_prediction, False)
+    past_df = rank_to_label(past_df, False)
+    
     df_for_prediction = prepare_data.prepare_data_for_prediction(
         df_for_prediction, 
         past_df, 
